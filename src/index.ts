@@ -14,6 +14,7 @@ const expressApp = express();
 expressApp.use(express.json());
 expressApp.use("/api/slack", slackHandler);
 
+// 테스트 엔드포인트 추가
 expressApp.get("/", (req, res) => {
   res.send("Server is running!");
 });
@@ -23,6 +24,13 @@ expressApp.get("/", (req, res) => {
   console.log("⚡️ Bolt app is running!");
 })();
 
-expressApp.listen(0, () => {
-  console.log("Express server is running!");
+const port = process.env.PORT || 0;
+
+const server = expressApp.listen(port, () => {
+  const address = server.address();
+  if (typeof address === "string") {
+    console.log(`Express server is running on port: ${address}`);
+  } else if (address && typeof address === "object") {
+    console.log(`Express server is running on port: ${address.port}`);
+  }
 });
