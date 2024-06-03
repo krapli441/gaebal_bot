@@ -1,7 +1,7 @@
 import { App } from "@slack/bolt";
 import express from "express";
-import fs from "fs";
 import dotenv from "dotenv";
+import slackHandler from "./api/slack";
 
 dotenv.config();
 
@@ -12,44 +12,7 @@ const app = new App({
 
 const expressApp = express();
 expressApp.use(express.json());
-
-const attendanceFile = "./attendance.json";
-
-const loadAttendance = () => {
-  if (fs.existsSync(attendanceFile)) {
-    const data = fs.readFileSync(attendanceFile, "utf8");
-    return JSON.parse(data);
-  }
-  return {};
-};
-
-const saveAttendance = (attendance: Record<string, string[]>) => {
-  fs.writeFileSync(attendanceFile, JSON.stringify(attendance, null, 2));
-};
-
-expressApp.post("/slack/commands", async (req, res) => {
-  const { text, user_id, command } = req.body;
-
-  if (command === "/근출") {
-    const currentDate = new Date().toLocaleDateString();
-    const attendance = loadAttendance();
-
-    if (!attendance[user_id]) {
-      attendance[user_id] = [];
-    }
-
-    const lastCheckIn = attendance[user_id].slice(-1)[0];
-    if (lastCheckIn !== currentDate) {
-      attendance[user_id].push(currentDate);
-      saveAttendance(attendance);
-      res.send(`<유후~ @${user_id}> ${currentDate}에 근출 완료~`);
-    } else {
-      res.send(`<@${user_id}>야~ 이미 오늘 근출했데이~`);
-    }
-  } else {
-    res.send("알 수 없는 명령어입니다.");
-  }
-});
+expressApp.use("/api/slack", slackHandler);
 
 (async () => {
   await app.start(process.env.PORT || 3000);
