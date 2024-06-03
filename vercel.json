@@ -1,5 +1,5 @@
 {
   "version": 2,
-  "builds": [{ "src": "src/api/slack.ts", "use": "@vercel/node" }],
-  "routes": [{ "src": "/api/slack/commands", "dest": "/src/api/slack.ts" }]
+  "builds": [{ "src": "src/index.ts", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "/src/index.ts" }]
 }
