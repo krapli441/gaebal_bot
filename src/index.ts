@@ -30,7 +30,7 @@ const saveAttendance = (attendance: Record<string, string[]>) => {
 expressApp.post("/slack/commands", async (req, res) => {
   const { text, user_id, command } = req.body;
 
-  if (command === "/checkin") {
+  if (command === "/근출") {
     const currentDate = new Date().toLocaleDateString();
     const attendance = loadAttendance();
 
@@ -42,9 +42,9 @@ expressApp.post("/slack/commands", async (req, res) => {
     if (lastCheckIn !== currentDate) {
       attendance[user_id].push(currentDate);
       saveAttendance(attendance);
-      res.send(`<@${user_id}>님, ${currentDate}에 출석 완료!`);
+      res.send(`<유후~ @${user_id}> ${currentDate}에 근출 완료~`);
     } else {
-      res.send(`<@${user_id}>님, 이미 오늘 출석하셨습니다.`);
+      res.send(`<@${user_id}>야~ 이미 오늘 근출했데이~`);
     }
   } else {
     res.send("알 수 없는 명령어입니다.");
