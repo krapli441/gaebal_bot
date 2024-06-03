@@ -14,6 +14,11 @@ const expressApp = express();
 expressApp.use(express.json());
 expressApp.use("/api/slack", slackHandler);
 
+// 테스트 엔드포인트
+expressApp.get("/", (req, res) => {
+  res.send("Server is running!");
+});
+
 (async () => {
   await app.start(process.env.PORT || 3000);
   console.log("⚡️ Bolt app is running!");
