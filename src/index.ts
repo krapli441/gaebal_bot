@@ -14,7 +14,6 @@ const expressApp = express();
 expressApp.use(express.json());
 expressApp.use("/api/slack", slackHandler);
 
-// 테스트 엔드포인트
 expressApp.get("/", (req, res) => {
   res.send("Server is running!");
 });
