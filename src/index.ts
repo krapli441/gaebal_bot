@@ -19,10 +19,10 @@ expressApp.get("/", (req, res) => {
 });
 
 (async () => {
-  await app.start(process.env.PORT || 3000);
+  await app.start(process.env.PORT || 0);
   console.log("⚡️ Bolt app is running!");
 })();
 
-expressApp.listen(3000, () => {
-  console.log("Express server is running on port 3000");
+expressApp.listen(0, () => {
+  console.log("Express server is running!");
 });
