@@ -42,11 +42,12 @@ expressApp.get("/", (req, res) => {
 });
 
 (async () => {
-  await app.start(process.env.PORT || 3000);
-  console.log("⚡️ Bolt app is running!");
+  const boltPort = process.env.BOLT_PORT || 3001; // Bolt 서버
+  await app.start(boltPort);
+  console.log(`⚡️ Bolt app is running on port: ${boltPort}`);
 })();
 
-const port = process.env.PORT || 3000;
-expressApp.listen(port, () => {
-  console.log(`Express server is running on port: ${port}`);
+const expressPort = process.env.EXPRESS_PORT || 3000; // Express 서버
+expressApp.listen(expressPort, () => {
+  console.log(`Express server is running on port: ${expressPort}`);
 });
