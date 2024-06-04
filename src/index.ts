@@ -20,17 +20,12 @@ expressApp.get("/", (req, res) => {
 });
 
 (async () => {
-  await app.start(process.env.PORT || 0);
+  await app.start(process.env.PORT || 3000); // Ensure a specific port is used
   console.log("⚡️ Bolt app is running!");
 })();
 
-const port = process.env.PORT || 0;
+const port = process.env.PORT || 3000;
 
 const server = expressApp.listen(port, () => {
-  const address = server.address();
-  if (typeof address === "string") {
-    console.log(`Express server is running on port: ${address}`);
-  } else if (address && typeof address === "object") {
-    console.log(`Express server is running on port: ${address.port}`);
-  }
+  console.log(`Express server is running on port ${port}`);
 });
