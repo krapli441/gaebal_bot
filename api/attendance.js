@@ -12,7 +12,8 @@ const slackToken = process.env.SLACK_BOT_TOKEN;
 app.post("/api/attendance", async (req, res) => {
   const { user_id, command } = req.body;
 
-  // 사용자 정보를 가져오는 함수
+  console.log("Received request body:", req.body);
+
   const getUserInfo = async (userId) => {
     try {
       const response = await axios.get("https://slack.com/api/users.info", {
@@ -32,7 +33,10 @@ app.post("/api/attendance", async (req, res) => {
         throw new Error(`Failed to fetch user info: ${response.data.error}`);
       }
     } catch (error) {
-      console.error("Error calling Slack API:", error);
+      console.error(
+        "Error calling Slack API:",
+        error.response ? error.response.data : error.message
+      );
       throw error;
     }
   };
@@ -42,16 +46,15 @@ app.post("/api/attendance", async (req, res) => {
     const responseText = `사용자 정보:\n이름: ${userProfile.real_name}\n닉네임: ${userProfile.display_name}\n이메일: ${userProfile.email}`;
 
     res.json({
-      response_type: "in_channel", // 공개 메시지
+      response_type: "in_channel",
       text: responseText,
     });
   } catch (error) {
-    console.error("Error fetching user info:", error);
-    res.status(500).send("Internal Server Error");
+    console.error("Error fetching user info:", error.message);
+    res.status(500).send(`Internal Server Error: ${error.message}`);
   }
 });
 
-// 포트 설정 및 서버 시작 (로컬 테스트용)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
