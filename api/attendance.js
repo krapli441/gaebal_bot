@@ -17,10 +17,10 @@ app.post('/api/attendance', (req, res) => {
   });
 });
 
-// 포트 설정 및 서버 시작 (로컬 테스트용)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// // 포트 설정 및 서버 시작 (로컬 테스트용)
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
 
 module.exports = app;
