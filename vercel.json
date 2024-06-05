@@ -4,12 +4,20 @@
     {
       "src": "api/attendance.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/attendance",
-      "dest": "/api/attendance.js"
+      "dest": "api/attendance.js"
+    },
+    {
+      "src": "/",
+      "dest": "api/index.js"
     }
   ]
 }
