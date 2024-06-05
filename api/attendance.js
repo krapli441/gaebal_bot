@@ -12,7 +12,7 @@ const slackToken = process.env.SLACK_BOT_TOKEN;
 app.post("/api/attendance", async (req, res) => {
   const { user_id, command } = req.body;
 
-  console.log("Received request body:", req.body);
+  console.log('Received request body:', req.body);
 
   // 사용자 정보를 가져오는 함수
   const getUserInfo = async (userId) => {
