@@ -13,6 +13,7 @@ app.post("/api/attendance", async (req, res) => {
   const { user_id, user_name, command } = req.body;
 
   console.log("Received request body:", req.body);
+  console.log(slackToken);
 
   // 사용자 정보를 가져오는 함수
   const getUserInfo = async (userId) => {
