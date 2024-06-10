@@ -46,11 +46,11 @@ app.post("/api/attendance", async (req, res) => {
 
   try {
     const userProfile = await getUserInfo(user_id);
-    const responseText = `사용자 전체 정보:\n${JSON.stringify(
-      userProfile,
-      null,
-      2
-    )}`; // JSON 포맷으로 전체 사용자 정보를 문자열로 변환합니다.
+    const username = userProfile.name;
+    const realName = userProfile.real_name;
+    const displayName = userProfile.profile.display_name;
+
+    const responseText = `유후~ @${username} 조회 결과 도착~\n아이디 : ${username}\n이름 : ${realName}\n닉네임 : ${displayName}`;
 
     res.json({
       response_type: "in_channel",
@@ -65,6 +65,7 @@ app.post("/api/attendance", async (req, res) => {
   }
 });
 
+// 로컬 테스트용
 // const PORT = process.env.PORT || 3000;
 // app.listen(PORT, () => {
 //   console.log(`Server is running on port ${PORT}`);
