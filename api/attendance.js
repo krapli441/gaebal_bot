@@ -19,11 +19,39 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
+const formatTimeString = (date) => {
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  return `${hours}:${minutes}:${seconds}`;
+};
+
+const parseTimeString = (timeString) => {
+  const [hours, minutes, seconds] = timeString.split(":").map(Number);
+  return { hours, minutes, seconds };
+};
+
+const calculateDuration = (startTime, endTime) => {
+  const start = parseTimeString(startTime);
+  const end = parseTimeString(endTime);
+
+  const startInSeconds =
+    start.hours * 3600 + start.minutes * 60 + start.seconds;
+  const endInSeconds = end.hours * 3600 + end.minutes * 60 + end.seconds;
+
+  const durationInSeconds = endInSeconds - startInSeconds;
+  const hours = Math.floor(durationInSeconds / 3600);
+  const minutes = Math.floor((durationInSeconds % 3600) / 60);
+  const seconds = durationInSeconds % 60;
+
+  return { hours, minutes, seconds };
+};
+
 app.post("/api/attendance", async (req, res) => {
   const { user_id, user_name, command, response_url } = req.body;
   const now = new Date();
   now.setHours(now.getHours() + 9); // 한국 시간대 적용 (UTC+9)
-  const timeString = now.toLocaleTimeString("ko-KR", { hour12: false });
+  const timeString = formatTimeString(now);
   const dateString = now.toISOString().split("T")[0]; // YYYY-MM-DD
 
   console.log("Received request body:", req.body);
@@ -57,21 +85,27 @@ app.post("/api/attendance", async (req, res) => {
       }
     } else if (command === "/근퇴") {
       if (!doc.exists || !doc.data().checkIn) {
-        responseText = `<@${user_id}> 아직 근출을 안 했데이~`;
+        responseText = `<@${user_id}> 아직 근출을 안 했데이 ~.~`;
       } else if (doc.data().checkOut) {
-        responseText = `<@${user_id}>~ 오늘 이미 근퇴 했데이~`;
+        responseText = `<@${user_id}>~ 오늘 이미 근퇴 했데이 ~.~`;
       } else {
         const checkInTime = doc.data().checkIn;
         const checkOutTime = timeString;
 
+        const { hours, minutes, seconds } = calculateDuration(
+          checkInTime,
+          checkOutTime
+        );
+
         await docRef.set(
           {
             checkOut: checkOutTime,
+            workDuration: `${hours}시간 ${minutes}분 ${seconds}초`,
           },
           { merge: true }
         );
 
-        responseText = `<@${user_id}> 근퇴~ ${checkInTime}부터 ${checkOutTime} 까지~`;
+        responseText = `<@${user_id}> 근퇴~ 오늘 ${hours}시간 ${minutes}분 작업했데이~`;
       }
     }
 
