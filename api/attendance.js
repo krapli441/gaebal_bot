@@ -69,7 +69,7 @@ app.post("/api/attendance", async (req, res) => {
 
     if (command === "/근출") {
       if (doc.exists && doc.data().checkIn) {
-        responseText = `<@${user_id}>야~ 오늘 이미 근출 했데이~`;
+        responseText = `<@${user_id}>~ 오늘 이미 근출 했데이~`;
       } else {
         await docRef.set(
           {
@@ -109,19 +109,17 @@ app.post("/api/attendance", async (req, res) => {
       }
     }
 
-    await sendSlackMessage(response_url, responseText);
-    res.json({
-      response_type: "in_channel", // 공개 메시지
-      text: responseText,
-    });
+    await sendSlackMessage(response_url, responseText, "in_channel"); // 슬랙 채널에 메시지 전송
+
+    res.status(200).send(); // 상태 코드만 전송하여 성공 응답
   } catch (error) {
     console.error(
       "Error fetching user info or processing attendance:",
       error.message
     );
-    res.json({
-      response_type: "ephemeral",
-      text: `오류가 발생했습니다: ${error.message}`,
+    res.status(200).json({
+      response_type: "ephemeral", // 사용자에게만 보이는 메시지
+      text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.`,
     });
   }
 });

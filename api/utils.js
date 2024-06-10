@@ -23,9 +23,16 @@ const getUserInfo = async (userId, slackToken) => {
   }
 };
 
-const sendSlackMessage = async (responseUrl, text) => {
+const sendSlackMessage = async (
+  responseUrl,
+  text,
+  responseType = "in_channel"
+) => {
   try {
-    await axios.post(responseUrl, { text });
+    await axios.post(responseUrl, {
+      response_type: responseType,
+      text,
+    });
   } catch (error) {
     console.error("Error sending Slack message:", error.message);
     throw new Error(`Error sending Slack message: ${error.message}`);
