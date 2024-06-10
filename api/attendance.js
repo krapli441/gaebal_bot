@@ -48,7 +48,7 @@ app.post("/api/attendance", async (req, res) => {
         { merge: true }
       );
 
-      responseText = `유후~ <@${user_id}> ${timeString}에 근출~`;
+      responseText = `<@${user_id}> ${timeString}에 근출~`;
     } else if (command === "/근퇴") {
       const doc = await db.collection("attendance").doc(user_id).get();
       if (!doc.exists || !doc.data().checkIn) {
