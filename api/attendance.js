@@ -61,24 +61,17 @@ app.post("/api/attendance", async (req, res) => {
       } else if (doc.data().checkOut) {
         responseText = `<@${user_id}>~ 오늘 이미 근퇴 했데이~`;
       } else {
-        const checkInTime = new Date(
-          `${dateString}T${doc.data().checkIn}:00+09:00`
-        );
-        const checkOutTime = now;
-        const workDurationMs = checkOutTime - checkInTime;
-        const workDurationMinutes = Math.floor(workDurationMs / 1000 / 60);
-        const workDurationHours = Math.floor(workDurationMinutes / 60);
-        const remainingMinutes = workDurationMinutes % 60;
+        const checkInTime = doc.data().checkIn;
+        const checkOutTime = timeString;
 
         await docRef.set(
           {
-            checkOut: timeString,
-            workDuration: `${workDurationHours}시간 ${remainingMinutes}분`,
+            checkOut: checkOutTime,
           },
           { merge: true }
         );
 
-        responseText = `<@${user_id}> ${timeString}에 근퇴~ 총 ${workDurationHours}시간 ${remainingMinutes}분동안 일했데이~`;
+        responseText = `<@${user_id}> 근퇴~ ${checkInTime}부터 ${checkOutTime} 까지~`;
       }
     }
 
