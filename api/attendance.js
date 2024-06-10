@@ -50,7 +50,7 @@ app.post("/api/attendance", async (req, res) => {
     const realName = userProfile.real_name;
     const displayName = userProfile.profile.display_name;
 
-    const responseText = `유후~ @${displayName} 조회 결과 도착~\n아이디 : ${username}\n이름 : ${realName}\n닉네임 : ${displayName}`;
+    const responseText = `유후~ <@${displayName}> 조회 결과 도착~\n아이디 : ${username}\n이름 : ${realName}\n닉네임 : ${displayName}`;
 
     res.json({
       response_type: "in_channel",
