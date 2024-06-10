@@ -36,48 +36,53 @@ app.post("/api/attendance", async (req, res) => {
 
     let responseText = "";
 
-    if (command === "/근출") {
-      await db.collection("attendance").doc(user_id).set(
-        {
-          date: dateString,
-          checkIn: timeString,
-          checkOut: null,
-          workDuration: null,
-          username: displayName,
-        },
-        { merge: true }
-      );
+    const docRef = db.collection("attendance").doc(`${user_id}_${dateString}`);
+    const doc = await docRef.get();
 
-      responseText = `<@${user_id}> ${timeString}에 근출~`;
-    } else if (command === "/근퇴") {
-      const doc = await db.collection("attendance").doc(user_id).get();
-      if (!doc.exists || !doc.data().checkIn) {
-        responseText = `<@${user_id}>야~ 근출을 안 했데이~`;
+    if (command === "/근출") {
+      if (doc.exists && doc.data().checkIn) {
+        responseText = `<@${user_id}>야~ 오늘 이미 근출 했데이~`;
       } else {
-        const checkInTime = new Date(`${dateString}T${doc.data().checkIn}`);
+        await docRef.set(
+          {
+            date: dateString,
+            checkIn: timeString,
+            checkOut: null,
+            workDuration: null,
+            username: displayName,
+          },
+          { merge: true }
+        );
+        responseText = `유후~ <@${user_id}> ${timeString}에 근출~`;
+      }
+    } else if (command === "/근퇴") {
+      if (!doc.exists || !doc.data().checkIn) {
+        responseText = `<@${user_id}> 아직 근출을 안 했데이~`;
+      } else if (doc.data().checkOut) {
+        responseText = `<@${user_id}>~ 오늘 이미 근퇴 했데이~`;
+      } else {
+        const checkInTime = new Date(
+          `${dateString}T${doc.data().checkIn}:00+09:00`
+        );
         const checkOutTime = now;
         const workDurationMs = checkOutTime - checkInTime;
         const workDurationMinutes = Math.floor(workDurationMs / 1000 / 60);
         const workDurationHours = Math.floor(workDurationMinutes / 60);
         const remainingMinutes = workDurationMinutes % 60;
 
-        await db
-          .collection("attendance")
-          .doc(user_id)
-          .set(
-            {
-              checkOut: timeString,
-              workDuration: `${workDurationHours}시간 ${remainingMinutes}분`,
-            },
-            { merge: true }
-          );
+        await docRef.set(
+          {
+            checkOut: timeString,
+            workDuration: `${workDurationHours}시간 ${remainingMinutes}분`,
+          },
+          { merge: true }
+        );
 
         responseText = `<@${user_id}> ${timeString}에 근퇴~ 총 ${workDurationHours}시간 ${remainingMinutes}분동안 일했데이~`;
       }
     }
 
     await sendSlackMessage(response_url, responseText);
-
     res.status(200).send(); // 추가 응답 없이 상태 코드만 전송
   } catch (error) {
     console.error(
