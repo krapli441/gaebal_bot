@@ -85,9 +85,9 @@ app.post("/api/attendance", async (req, res) => {
       }
     } else if (command === "/근퇴") {
       if (!doc.exists || !doc.data().checkIn) {
-        responseText = `<@${user_id}> 아직 근출을 안 했데이 ~.~`;
+        responseText = `<@${user_id}> 아직 근출을 안 했데이~`;
       } else if (doc.data().checkOut) {
-        responseText = `<@${user_id}>~ 오늘 이미 근퇴 했데이 ~.~`;
+        responseText = `<@${user_id}>~ 오늘 이미 근퇴 했데이~`;
       } else {
         const checkInTime = doc.data().checkIn;
         const checkOutTime = timeString;
