@@ -22,6 +22,7 @@ const db = admin.firestore();
 app.post("/api/attendance", async (req, res) => {
   const { user_id, user_name, command, response_url } = req.body;
   const now = new Date();
+  now.setHours(now.getHours() + 9); // 한국 시간대 적용 (UTC+9)
   const timeString = now.toLocaleTimeString("ko-KR", { hour12: false });
   const dateString = now.toISOString().split("T")[0]; // YYYY-MM-DD
 
@@ -32,6 +33,8 @@ app.post("/api/attendance", async (req, res) => {
     const username = userProfile.name;
     const realName = userProfile.real_name;
     const displayName = userProfile.profile.display_name;
+
+    let responseText = "";
 
     if (command === "/근출") {
       await db.collection("attendance").doc(user_id).set(
@@ -45,26 +48,14 @@ app.post("/api/attendance", async (req, res) => {
         { merge: true }
       );
 
-      const responseText = `유후~ <@${user_id}> ${timeString}에 근출~`;
-      await sendSlackMessage(response_url, responseText);
-
-      res.json({
-        response_type: "in_channel",
-        text: "출근 시간이 기록되었습니다.",
-      });
+      responseText = `유후~ <@${user_id}> ${timeString}에 근출~`;
     } else if (command === "/근퇴") {
       const doc = await db.collection("attendance").doc(user_id).get();
       if (!doc.exists || !doc.data().checkIn) {
-        const errorText = `<@${user_id}>야~ 근출을 안 했데이~`;
-        await sendSlackMessage(response_url, errorText);
-
-        res.json({
-          response_type: "ephemeral",
-          text: "근출 기록이 없습니다.",
-        });
+        responseText = `<@${user_id}>야~ 근출을 안 했데이~`;
       } else {
         const checkInTime = new Date(`${dateString}T${doc.data().checkIn}`);
-        const checkOutTime = new Date(`${dateString}T${timeString}`);
+        const checkOutTime = now;
         const workDurationMs = checkOutTime - checkInTime;
         const workDurationMinutes = Math.floor(workDurationMs / 1000 / 60);
         const workDurationHours = Math.floor(workDurationMinutes / 60);
@@ -81,15 +72,13 @@ app.post("/api/attendance", async (req, res) => {
             { merge: true }
           );
 
-        const responseText = `<@${user_id}> ${timeString}에 근퇴~ 총 ${workDurationHours}시간 ${remainingMinutes}분동안 일했데이~`;
-        await sendSlackMessage(response_url, responseText);
-
-        res.json({
-          response_type: "in_channel",
-          text: "퇴근 시간이 기록되었습니다.",
-        });
+        responseText = `<@${user_id}> ${timeString}에 근퇴~ 총 ${workDurationHours}시간 ${remainingMinutes}분동안 일했데이~`;
       }
     }
+
+    await sendSlackMessage(response_url, responseText);
+
+    res.status(200).send(); // 추가 응답 없이 상태 코드만 전송
   } catch (error) {
     console.error(
       "Error fetching user info or processing attendance:",
