@@ -110,7 +110,10 @@ app.post("/api/attendance", async (req, res) => {
     }
 
     await sendSlackMessage(response_url, responseText);
-    res.status(200).send(); // 추가 응답 없이 상태 코드만 전송
+    res.json({
+      response_type: "in_channel", // 공개 메시지
+      text: responseText,
+    });
   } catch (error) {
     console.error(
       "Error fetching user info or processing attendance:",
