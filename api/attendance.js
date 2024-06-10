@@ -29,7 +29,7 @@ app.post("/api/attendance", async (req, res) => {
       console.log("Slack API response:", response.data);
 
       if (response.data.ok) {
-        return response.data.user.profile;
+        return response.data.user; // 전체 사용자 정보를 반환합니다.
       } else {
         throw new Error(`Slack API error: ${response.data.error}`);
       }
@@ -46,7 +46,11 @@ app.post("/api/attendance", async (req, res) => {
 
   try {
     const userProfile = await getUserInfo(user_id);
-    const responseText = `사용자 정보:\n이름: ${userProfile.real_name}\n닉네임: ${userProfile.display_name}\n이메일: ${userProfile.email}`;
+    const responseText = `사용자 전체 정보:\n${JSON.stringify(
+      userProfile,
+      null,
+      2
+    )}`; // JSON 포맷으로 전체 사용자 정보를 문자열로 변환합니다.
 
     res.json({
       response_type: "in_channel",
@@ -61,10 +65,9 @@ app.post("/api/attendance", async (req, res) => {
   }
 });
 
-// 포트 설정 및 서버 시작 (로컬 테스트용)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
 
 module.exports = app;
