@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 
 const slackToken = process.env.SLACK_BOT_TOKEN;
 
-app.post("/api/attendance", async (req, res) => {
+app.post("/api/search", async (req, res) => {
   const { user_id, user_name, command, response_url } = req.body;
 
   console.log("Received request body:", req.body);
