@@ -12,7 +12,7 @@
   ],
   "routes": [
     {
-      "src": "/api/조회",
+      "src": "/api/search",
       "dest": "api/search.js"
     },
     {
