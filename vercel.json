@@ -2,19 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/search.js",
-      "use": "@vercel/node"
-    },
-    {
       "src": "api/attendance.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
-    {
-      "src": "/api/search",
-      "dest": "api/search.js"
-    },
     {
       "src": "/api/attendance",
       "dest": "api/attendance.js"
