@@ -69,7 +69,7 @@ app.post("/api/attendance", async (req, res) => {
 
     if (command === "/근출") {
       if (doc.exists && doc.data().checkIn) {
-        responseText = `<@${user_id}>~ 오늘 이미 근출 했데이~`;
+        responseText = `<@${user_id}> 오늘 이미 근출 했데이~`;
       } else {
         await docRef.set(
           {
@@ -87,7 +87,7 @@ app.post("/api/attendance", async (req, res) => {
       if (!doc.exists || !doc.data().checkIn) {
         responseText = `<@${user_id}> 아직 근출을 안 했데이~`;
       } else if (doc.data().checkOut) {
-        responseText = `<@${user_id}>~ 오늘 이미 근퇴 했데이~`;
+        responseText = `<@${user_id}> 오늘 이미 근퇴 했데이~`;
       } else {
         const checkInTime = doc.data().checkIn;
         const checkOutTime = timeString;
