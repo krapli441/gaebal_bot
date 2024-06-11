@@ -1,54 +1,13 @@
 const express = require("express");
-const bodyParser = require("body-parser");
-const admin = require("firebase-admin");
-require("dotenv").config();
-const { getUserInfo, sendSlackMessage } = require("./utils");
+const { getUserInfo, sendSlackMessage } = require("../utils/slack");
+const { formatTimeString, calculateDuration } = require("../utils/time");
+const db = require("../config/firebase");
 
-const app = express();
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
+const router = express.Router();
 const slackToken = process.env.SLACK_BOT_TOKEN;
 
-// Firebase 초기화
-const serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
-const db = admin.firestore();
-
-const formatTimeString = (date) => {
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const seconds = String(date.getSeconds()).padStart(2, "0");
-  return `${hours}:${minutes}:${seconds}`;
-};
-
-const parseTimeString = (timeString) => {
-  const [hours, minutes, seconds] = timeString.split(":").map(Number);
-  return { hours, minutes, seconds };
-};
-
-const calculateDuration = (startTime, endTime) => {
-  const start = parseTimeString(startTime);
-  const end = parseTimeString(endTime);
-
-  const startInSeconds =
-    start.hours * 3600 + start.minutes * 60 + start.seconds;
-  const endInSeconds = end.hours * 3600 + end.minutes * 60 + end.seconds;
-
-  const durationInSeconds = endInSeconds - startInSeconds;
-  const hours = Math.floor(durationInSeconds / 3600);
-  const minutes = Math.floor((durationInSeconds % 3600) / 60);
-  const seconds = durationInSeconds % 60;
-
-  return { hours, minutes, seconds };
-};
-
-app.post("/api/attendance", async (req, res) => {
-  const { user_id, user_name, command, response_url } = req.body;
+router.post("/", async (req, res) => {
+  const { user_id, command, response_url } = req.body;
   const now = new Date();
   now.setHours(now.getHours() + 9); // 한국 시간대 적용 (UTC+9)
   const timeString = formatTimeString(now);
@@ -58,8 +17,6 @@ app.post("/api/attendance", async (req, res) => {
 
   try {
     const userProfile = await getUserInfo(user_id, slackToken);
-    const username = userProfile.name;
-    const realName = userProfile.real_name;
     const displayName = userProfile.profile.display_name;
 
     let responseText = "";
@@ -110,7 +67,6 @@ app.post("/api/attendance", async (req, res) => {
     }
 
     await sendSlackMessage(response_url, responseText, "in_channel"); // 슬랙 채널에 메시지 전송
-
     res.status(200).send(); // 상태 코드만 전송하여 성공 응답
   } catch (error) {
     console.error(
@@ -124,10 +80,4 @@ app.post("/api/attendance", async (req, res) => {
   }
 });
 
-// 로컬 테스트용
-// const PORT = process.env.PORT || 3000;
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}`);
-// });
-
-module.exports = app;
+module.exports = router;

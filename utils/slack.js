@@ -1,10 +1,10 @@
 const axios = require("axios");
 
-const getUserInfo = async (userId, slackToken) => {
+const getUserInfo = async (userId, token) => {
   try {
     const response = await axios.get("https://slack.com/api/users.info", {
       params: { user: userId },
-      headers: { Authorization: `Bearer ${slackToken}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (response.data.ok) {
