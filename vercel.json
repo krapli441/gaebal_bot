@@ -13,7 +13,7 @@
     },
     {
       "src": "/api/scheduler",
-      "dest": "/api/scheduler.js"
+      "dest": "app.js"
     }
   ]
 }
