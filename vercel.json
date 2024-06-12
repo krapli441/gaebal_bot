@@ -4,15 +4,15 @@
     {
       "src": "app.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "scheduler.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/attendance",
-      "dest": "app.js"
-    },
-    {
-      "src": "/api/slackChannelId",
       "dest": "app.js"
     }
   ]
