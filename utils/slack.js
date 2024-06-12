@@ -39,4 +39,24 @@ const sendSlackMessage = async (
   }
 };
 
-module.exports = { getUserInfo, sendSlackMessage };
+const sendSlackChannelMessage = async (channelId, text, token) => {
+  try {
+    await axios.post(
+      "https://slack.com/api/chat.postMessage",
+      {
+        channel: channelId,
+        text: text,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Error sending Slack message:", error.message);
+    throw new Error(`Error sending Slack message: ${error.message}`);
+  }
+};
+
+module.exports = { getUserInfo, sendSlackMessage, sendSlackChannelMessage };
