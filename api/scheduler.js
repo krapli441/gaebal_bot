@@ -1,5 +1,5 @@
 const cron = require("node-cron");
-const { sendSlackChannelMessage } = require("./utils/slack");
+const { sendSlackChannelMessage } = require("../utils/slack");
 
 const slackChannelId = "C03QRB7635X";
 const slackToken = process.env.SLACK_BOT_TOKEN;

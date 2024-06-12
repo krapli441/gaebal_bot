@@ -4,20 +4,16 @@
     {
       "src": "app.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "scheduler.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/attendance",
-      "dest": "app.js"
+      "dest": "/api/attendance.js"
     },
     {
       "src": "/api/sendMessage",
-      "dest": "scheduler.js"
+      "dest": "/api/sendMessage.js"
     }
   ]
 }
