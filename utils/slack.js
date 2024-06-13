@@ -39,31 +39,34 @@ const sendSlackMessage = async (
   }
 };
 
-const sendSlackChannelMessage = async (channel, text) => {
-  const token = process.env.SLACK_BOT_TOKEN;
-  try {
-    const response = await axios.post(
-      "https://slack.com/api/chat.postMessage",
-      {
-        channel: channel,
-        text: text,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+const isLastDayOfMonth = (date) => {
+  const tomorrow = new Date(date);
+  tomorrow.setDate(date.getDate() + 1);
+  return tomorrow.getDate() === 1;
+};
 
-    if (!response.data.ok) {
-      throw new Error(`Slack API error: ${response.data.error}`);
+const sendSlackChannelMessage = async (channelId, text, token) => {
+  try {
+    if (isLastDayOfMonth(new Date())) {
+      await axios.post(
+        "https://slack.com/api/chat.postMessage",
+        {
+          channel: channelId,
+          text: text,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
     } else {
-      console.log("Message sent successfully:", response.data);
+      console.log("Today is not the last day of the month.");
     }
   } catch (error) {
-    console.error("Error sending Slack channel message:", error.message);
-    throw new Error(`Error sending Slack channel message: ${error.message}`);
+    console.error("Error sending Slack message:", error.message);
+    throw new Error(`Error sending Slack message: ${error.message}`);
   }
 };
 
