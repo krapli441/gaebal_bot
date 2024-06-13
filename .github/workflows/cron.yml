@@ -1,0 +1,14 @@
+name: Schedule Slack Message
+
+on:
+  schedule:
+    - cron: "*/1 * * * *" # 매 분마다 실행
+
+jobs:
+  send_slack_message:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Vercel API
+        run: curl -X POST https://<your-vercel-deployment-url>/api/send-message
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
