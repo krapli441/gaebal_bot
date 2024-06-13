@@ -9,6 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call Vercel API
-        run: curl -X POST https://<your-vercel-deployment-url>/api/send-message
+        run: curl -X POST https://gaebal-bot.vercel.app/api/send-message
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
