@@ -2,14 +2,18 @@
   "version": 2,
   "builds": [
     {
-      "src": "app.js",
+      "src": "api/*.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
+      "src": "/api/send-message",
+      "dest": "/api/send-message.js"
+    },
+    {
       "src": "/api/attendance",
-      "dest": "app.js"
+      "dest": "/api/attendance.js"
     }
   ]
 }

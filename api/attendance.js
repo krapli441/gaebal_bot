@@ -3,10 +3,13 @@ const { getUserInfo, sendSlackMessage } = require("../utils/slack");
 const { formatTimeString, calculateDuration } = require("../utils/time");
 const db = require("../config/firebase");
 
-const router = express.Router();
+const app = express();
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
 const slackToken = process.env.SLACK_BOT_TOKEN;
 
-router.post("/", async (req, res) => {
+app.post("/api/attendance", async (req, res) => {
   const { user_id, command, response_url } = req.body;
   const now = new Date();
   now.setHours(now.getHours() + 9); // 한국 시간대 적용 (UTC+9)
@@ -88,4 +91,4 @@ router.post("/", async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = app;
