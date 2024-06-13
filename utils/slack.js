@@ -39,19 +39,14 @@ const sendSlackMessage = async (
   }
 };
 
-const sendSlackChannelMessage = async (
-  channel,
-  text,
-  responseType = "in_channel"
-) => {
+const sendSlackChannelMessage = async (channel, text) => {
   const token = process.env.SLACK_BOT_TOKEN;
   try {
-    await axios.post(
+    const response = await axios.post(
       "https://slack.com/api/chat.postMessage",
       {
         channel: channel,
         text: text,
-        response_type: responseType,
       },
       {
         headers: {
@@ -60,6 +55,12 @@ const sendSlackChannelMessage = async (
         },
       }
     );
+
+    if (!response.data.ok) {
+      throw new Error(`Slack API error: ${response.data.error}`);
+    } else {
+      console.log("Message sent successfully:", response.data);
+    }
   } catch (error) {
     console.error("Error sending Slack channel message:", error.message);
     throw new Error(`Error sending Slack channel message: ${error.message}`);
