@@ -39,4 +39,31 @@ const sendSlackMessage = async (
   }
 };
 
-module.exports = { getUserInfo, sendSlackMessage };
+const sendSlackChannelMessage = async (
+  channel,
+  text,
+  responseType = "in_channel"
+) => {
+  const token = process.env.SLACK_BOT_TOKEN;
+  try {
+    await axios.post(
+      "https://slack.com/api/chat.postMessage",
+      {
+        channel: channel,
+        text: text,
+        response_type: responseType,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Error sending Slack channel message:", error.message);
+    throw new Error(`Error sending Slack channel message: ${error.message}`);
+  }
+};
+
+module.exports = { getUserInfo, sendSlackMessage, sendSlackChannelMessage };
