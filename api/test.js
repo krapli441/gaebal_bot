@@ -1,13 +1,10 @@
 const express = require("express");
-const { WebClient } = require("@slack/web-api");
 const kv = require("../config/kv");
+const { sendSlackMessage } = require("../utils/slack");
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-const slackToken = process.env.SLACK_BOT_TOKEN;
-const slackClient = new WebClient(slackToken);
 
 app.post("/api/test", async (req, res) => {
   const { user_id, response_url } = req.body;
@@ -16,15 +13,9 @@ app.post("/api/test", async (req, res) => {
   try {
     await kv.set(`test:${user_id}`, uniqueValue);
 
-    const message = {
-      response_type: "in_channel",
-      text: "테스트가 정상적으로 실행되었습니다.",
-    };
+    const message = "테스트가 정상적으로 실행되었습니다.";
 
-    await slackClient.chat.postMessage({
-      channel: response_url,
-      text: message.text,
-    });
+    await sendSlackMessage(response_url, message);
 
     res.status(200).send();
   } catch (error) {
