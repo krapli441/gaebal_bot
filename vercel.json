@@ -14,6 +14,10 @@
     {
       "src": "/api/attendance",
       "dest": "/api/attendance.js"
+    },
+    {
+      "src": "/api/test",
+      "dest": "/api/test.js"
     }
   ]
 }
