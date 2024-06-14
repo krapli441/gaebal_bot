@@ -1,7 +1,7 @@
 const express = require("express");
 const { getUserInfo, sendSlackMessage } = require("../utils/slack");
 const { formatTimeString, calculateDuration } = require("../utils/time");
-const db = require("../config/firebase");
+const kv = require("../config/kv");
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -24,32 +24,29 @@ app.post("/api/attendance", async (req, res) => {
 
     let responseText = "";
 
-    const docRef = db.collection("attendance").doc(`${user_id}_${dateString}`);
-    const doc = await docRef.get();
+    const userKey = `user:${user_id}_${dateString}`;
+    const userData = await kv.hgetall(userKey);
 
     if (command === "/근출") {
-      if (doc.exists && doc.data().checkIn) {
+      if (userData && userData.checkIn) {
         responseText = `<@${user_id}> 오늘 이미 근출 했데이~`;
       } else {
-        await docRef.set(
-          {
-            date: dateString,
-            checkIn: timeString,
-            checkOut: null,
-            workDuration: null,
-            username: displayName,
-          },
-          { merge: true }
-        );
+        await kv.hmset(userKey, {
+          date: dateString,
+          checkIn: timeString,
+          checkOut: null,
+          workDuration: null,
+          username: displayName,
+        });
         responseText = `유후~ <@${user_id}> ${timeString}에 근출~`;
       }
     } else if (command === "/근퇴") {
-      if (!doc.exists || !doc.data().checkIn) {
+      if (!userData || !userData.checkIn) {
         responseText = `<@${user_id}> 아직 근출을 안 했데이~`;
-      } else if (doc.data().checkOut) {
+      } else if (userData.checkOut) {
         responseText = `<@${user_id}> 오늘 이미 근퇴 했데이~`;
       } else {
-        const checkInTime = doc.data().checkIn;
+        const checkInTime = userData.checkIn;
         const checkOutTime = timeString;
 
         const { hours, minutes, seconds } = calculateDuration(
@@ -57,36 +54,33 @@ app.post("/api/attendance", async (req, res) => {
           checkOutTime
         );
 
-        await docRef.set(
-          {
-            checkOut: checkOutTime,
-            workDuration: `${hours}시간 ${minutes}분 ${seconds}초`,
-          },
-          { merge: true }
-        );
+        await kv.hmset(userKey, {
+          ...userData,
+          checkOut: checkOutTime,
+          workDuration: `${hours}시간 ${minutes}분 ${seconds}초`,
+        });
 
         responseText = `<@${user_id}> 근퇴~ 오늘 ${hours}시간 ${minutes}분 작업했데이~`;
       }
     }
 
     try {
-      await sendSlackMessage(response_url, responseText, "in_channel"); // 슬랙 채널에 메시지 전송
-      res.status(200).send(); // 상태 코드만 전송하여 성공 응답
+      await sendSlackMessage(response_url, responseText, "in_channel");
+      res.status(200).send();
     } catch (sendError) {
-      console.error("Error sending Slack message:", sendError.message);
+      console.error("Error sending Slack message:", sendError);
       res.status(200).json({
-        response_type: "ephemeral", // 사용자에게만 보이는 메시지
-        text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.`,
+        response_type: "ephemeral",
+        text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${sendError.message}`,
+        details: sendError,
       });
     }
   } catch (error) {
-    console.error(
-      "Error fetching user info or processing attendance:",
-      error.message
-    );
+    console.error("Error fetching user info or processing attendance:", error);
     res.status(500).json({
-      response_type: "ephemeral", // 사용자에게만 보이는 메시지
-      text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.`,
+      response_type: "ephemeral",
+      text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${error.message}`,
+      details: error,
     });
   }
 });
