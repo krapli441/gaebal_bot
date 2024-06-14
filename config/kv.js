@@ -1,4 +1,4 @@
-import { createClient } from "@vercel/kv";
+const createClient = require("@vercel/kv");
 
 const kv = createClient({
   url: process.env.KV_REST_API_URL,

@@ -72,7 +72,7 @@ app.post("/api/attendance", async (req, res) => {
       res.status(200).json({
         response_type: "ephemeral",
         text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${sendError.message}`,
-        details: sendError,
+        details: sendError.message,
       });
     }
   } catch (error) {
@@ -80,7 +80,7 @@ app.post("/api/attendance", async (req, res) => {
     res.status(500).json({
       response_type: "ephemeral",
       text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${error.message}`,
-      details: error,
+      details: error.message,
     });
   }
 });
