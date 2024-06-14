@@ -24,14 +24,14 @@ app.post("/api/attendance", async (req, res) => {
 
     let responseText = "";
 
-    const userKey = `${user_id}_${dateString}`;
-    const userData = await kv.get(userKey);
+    const userKey = `user:${user_id}_${dateString}`;
+    const userData = await kv.hgetall(userKey);
 
     if (command === "/근출") {
       if (userData && userData.checkIn) {
         responseText = `<@${user_id}> 오늘 이미 근출 했데이~`;
       } else {
-        await kv.set(userKey, {
+        await kv.hmset(userKey, {
           date: dateString,
           checkIn: timeString,
           checkOut: null,
@@ -54,7 +54,7 @@ app.post("/api/attendance", async (req, res) => {
           checkOutTime
         );
 
-        await kv.set(userKey, {
+        await kv.hmset(userKey, {
           ...userData,
           checkOut: checkOutTime,
           workDuration: `${hours}시간 ${minutes}분 ${seconds}초`,
@@ -65,23 +65,22 @@ app.post("/api/attendance", async (req, res) => {
     }
 
     try {
-      await sendSlackMessage(response_url, responseText, "in_channel"); // 슬랙 채널에 메시지 전송
-      res.status(200).send(); // 상태 코드만 전송하여 성공 응답
+      await sendSlackMessage(response_url, responseText, "in_channel");
+      res.status(200).send();
     } catch (sendError) {
-      console.error("Error sending Slack message:", sendError.message);
+      console.error("Error sending Slack message:", sendError);
       res.status(200).json({
-        response_type: "ephemeral", // 사용자에게만 보이는 메시지
-        text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.`,
+        response_type: "ephemeral",
+        text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${sendError.message}`,
+        details: sendError,
       });
     }
   } catch (error) {
-    console.error(
-      "Error fetching user info or processing attendance:",
-      error.message
-    );
+    console.error("Error fetching user info or processing attendance:", error);
     res.status(500).json({
-      response_type: "ephemeral", // 사용자에게만 보이는 메시지
-      text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.`,
+      response_type: "ephemeral",
+      text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${error.message}`,
+      details: error,
     });
   }
 });

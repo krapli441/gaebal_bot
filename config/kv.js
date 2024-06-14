@@ -1,7 +1,3 @@
-const { createClient } = require("@vercel/kv");
+import { kv } from "@vercel/kv";
 
-const kv = createClient({
-  url: process.env.VERCEL_KV_URL,
-});
-
-module.exports = kv;
+export default kv;
