@@ -9,11 +9,11 @@
   "routes": [
     {
       "src": "/api/attendance/checkIn",
-      "dest": "/api/attendance.js"
+      "dest": "/api/attendanceCheckIn.js"
     },
     {
       "src": "/api/attendance/checkOut",
-      "dest": "/api/attendance.js"
+      "dest": "/api/attendanceCheckOut.js"
     }
   ]
 }
