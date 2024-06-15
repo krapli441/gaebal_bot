@@ -8,16 +8,12 @@
   ],
   "routes": [
     {
-      "src": "/api/send-message",
-      "dest": "/api/send-message.js"
-    },
-    {
-      "src": "/api/attendance",
+      "src": "/api/attendance/checkIn",
       "dest": "/api/attendance.js"
     },
     {
-      "src": "/api/test",
-      "dest": "/api/test.js"
+      "src": "/api/attendance/checkOut",
+      "dest": "/api/attendance.js"
     }
   ]
 }
