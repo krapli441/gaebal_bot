@@ -16,7 +16,7 @@
       "dest": "/api/attendanceCheckOut.js"
     },
     {
-      "src": "/api/attendance/sendMessage",
+      "src": "/api/send-message",
       "dest": "/api/send-message.js"
     }
   ]
