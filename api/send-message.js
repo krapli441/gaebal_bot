@@ -2,7 +2,7 @@ const { sendSlackChannelMessage } = require("../utils/slack");
 
 module.exports = async (req, res) => {
   const channel = "C03QRB7635X"; // 슬랙 채널 ID
-  const message = "This is a test message sent every minute.";
+  const message = `<@channel> 테스트~`;
   try {
     await sendSlackChannelMessage(channel, message);
     return res.status(200).json({ message: "Message sent successfully." });
