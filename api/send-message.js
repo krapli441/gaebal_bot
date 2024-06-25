@@ -2,7 +2,7 @@ const { sendSlackChannelMessage } = require("../utils/slack");
 
 module.exports = async (req, res) => {
   const channel = "C03QRB7635X"; // 슬랙 채널 ID
-  const message = `<!channel> 테스트~`;
+  const message = `<!channel> 키상!! 키상!!`;
   const token = process.env.SLACK_BOT_TOKEN;
   try {
     await sendSlackChannelMessage(channel, message, token);
