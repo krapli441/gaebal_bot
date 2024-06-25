@@ -2,7 +2,7 @@ name: Schedule Slack Message
 
 on:
   schedule:
-    - cron: "*/1 * * * *" # 1분마다 실행
+    - cron: "0 23 * * *" #한국 시간 기준 오전 8시
 
 jobs:
   send_slack_message:
