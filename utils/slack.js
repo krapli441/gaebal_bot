@@ -39,35 +39,34 @@ const sendSlackMessage = async (
   }
 };
 
-const isLastDayOfMonth = (date) => {
-  const tomorrow = new Date(date);
-  tomorrow.setDate(date.getDate() + 1);
-  return tomorrow.getDate() === 1;
-};
+// const isLastDayOfMonth = (date) => {
+//   const tomorrow = new Date(date);
+//   tomorrow.setDate(date.getDate() + 1);
+//   return tomorrow.getDate() === 1;
+// };
 
 const sendSlackChannelMessage = async (channelId, text, token) => {
   try {
-    if (isLastDayOfMonth(new Date())) {
-      await axios.post(
-        "https://slack.com/api/chat.postMessage",
-        {
-          channel: channelId,
-          text: text,
+    await axios.post(
+      "https://slack.com/api/chat.postMessage",
+      {
+        channel: channelId,
+        text: text,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    } else {
-      console.log("Today is not the last day of the month.");
-    }
+      }
+    );
   } catch (error) {
     console.error("Error sending Slack message:", error.message);
     throw new Error(`Error sending Slack message: ${error.message}`);
   }
 };
+
+module.exports = { sendSlackChannelMessage };
+
 
 module.exports = { getUserInfo, sendSlackMessage, sendSlackChannelMessage };
