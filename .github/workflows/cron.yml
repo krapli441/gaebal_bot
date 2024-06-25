@@ -2,8 +2,7 @@ name: Schedule Slack Message
 
 on:
   schedule:
-    - cron: "0 0 28-31 * *" # 매월 28, 29, 30, 31일에 실행
-    - cron: "0 0 1 * *" # 매월 1일에 실행하여 마지막 날인지 확인
+    - cron: "*/1 * * * *" # 1분마다 실행
 
 jobs:
   send_slack_message:
