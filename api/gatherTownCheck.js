@@ -20,7 +20,7 @@ const gatherTownCheck = async (req, res) => {
     game.subscribeToEvent("playerJoins", () => {
       const userCount = Object.keys(game.players).length;
       const responseText = `현재 게더 타운 접속자 수: ${userCount}명`;
-      
+
       // Slack 메시지 전송
       sendSlackMessage(response_url, responseText, "in_channel")
         .then(() => res.status(200).send())
