@@ -6,8 +6,8 @@ const port = 3000;
 
 global.WebSocket = WebSocket;
 
-const apiKey = "fCWInrmHqJ8WHeSY"; // 이 키들은 env로 감춰서 배포 가능?
-const spaceId = "OcIILW9NUkR8Vk2A\\gaebalgoebal"; // 이 키도!
+const apiKey = ""; // 이 키들은 env로 감춰서 배포 가능?
+const spaceId = ""; // 이 키도!
 
 const game = new Game(spaceId, () => Promise.resolve({ apiKey }));
 game.connect();
