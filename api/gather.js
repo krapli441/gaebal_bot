@@ -1,47 +1,38 @@
-const express = require("express");
-const { Game, Player } = require("@gathertown/gather-game-client");
+const { Game } = require("@gathertown/gather-game-client");
 const { WebSocket } = require("ws");
-const app = express();
-const port = 3000;
+const { sendSlackMessage } = require("../utils/slack");
 
 global.WebSocket = WebSocket;
 
-const apiKey = ""; // 이 키들은 env로 감춰서 배포 가능?
-const spaceId = ""; // 이 키도!
+require("dotenv").config();
 
-const game = new Game(spaceId, () => Promise.resolve({ apiKey }));
-game.connect();
+const apiKey = process.env.GATHER_API_KEY;
+const spaceId = process.env.GATHER_SPACE_ID;
 
-let presentConnectedUserCounts = 0;
+const gatherTownCheck = async (req, res) => {
+  const { response_url } = req.body;
 
-function subscribeToPlayerJoins() {
-  return new Promise((resolve) => {
-    game.subscribeToEvent("playerJoins", (player) => {
-      presentConnectedUserCounts = Object.keys(game.players).length;
-      // console.log("현재 접속자 수:", presentConnectedUserCounts);
-      resolve(presentConnectedUserCounts);
+  const game = new Game(spaceId, () => Promise.resolve({ apiKey }));
+  game.connect();
+
+  try {
+    await new Promise((resolve) => game.subscribeToConnection(resolve));
+
+    const userCount = Object.keys(game.players).length;
+    game.disconnect();
+
+    const responseText = `현재 게더 타운 접속자 수: ${userCount}명`;
+
+    await sendSlackMessage(response_url, responseText, "in_channel");
+    res.status(200).send();
+  } catch (error) {
+    console.error("Error checking Gather Town users:", error);
+    res.status(500).json({
+      response_type: "ephemeral",
+      text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${error.message}`,
+      details: error.message,
     });
-  });
-}
+  }
+};
 
-// 초기화 함수
-async function initializePlayerCounts() {
-  console.log("Waiting for players to join...");
-
-  // 현재 접속자 수를 먼저 확인
-  presentConnectedUserCounts = Object.keys(game.players).length;
-  // console.log("초기 접속자 수:", presentConnectedUserCounts);
-
-  // 새로운 플레이어가 접속할 때마다 현재 접속자 수를 업데이트
-  await subscribeToPlayerJoins();
-
-  // console.log("최종 결과", presentConnectedUserCounts);
-
-  return presentConnectedUserCounts;
-}
-
-initializePlayerCounts().then((count) => {
-  console.log("게더 타운 현재 접속자 수 : ", count);
-});
-
-// game.disconnect();
+module.exports = gatherTownCheck;
