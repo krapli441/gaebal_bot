@@ -1,10 +1,5 @@
 const { Game } = require("@gathertown/gather-game-client");
-const { WebSocket } = require("ws");
 const { sendSlackMessage } = require("../utils/slack");
-
-global.WebSocket = WebSocket;
-
-require("dotenv").config();
 
 const apiKey = process.env.GATHER_API_KEY;
 const spaceId = process.env.GATHER_SPACE_ID;
