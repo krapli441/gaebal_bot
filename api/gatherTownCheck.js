@@ -16,24 +16,6 @@ const gatherTownCheck = async (req, res) => {
     // 연결 이벤트 대기
     await new Promise((resolve) => game.subscribeToConnection(resolve));
 
-    // playerJoins 이벤트 구독
-    game.subscribeToEvent("playerJoins", () => {
-      const userCount = Object.keys(game.players).length;
-      const responseText = `현재 게더 타운 접속자 수: ${userCount}명`;
-      
-      // Slack 메시지 전송
-      sendSlackMessage(response_url, responseText, "in_channel")
-        .then(() => res.status(200).send())
-        .catch((error) => {
-          console.error("Error sending Slack message:", error);
-          res.status(500).json({
-            response_type: "ephemeral",
-            text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${error.message}`,
-            details: error.message,
-          });
-        });
-    });
-
     // 기존 플레이어 정보 가져오기
     const userCount = Object.keys(game.players).length;
     const responseText = `현재 게더 타운 접속자 수: ${userCount}명`;
