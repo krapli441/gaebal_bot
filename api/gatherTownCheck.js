@@ -14,15 +14,16 @@ const gatherTownCheck = async (req, res) => {
 
   try {
     await new Promise((resolve) => game.subscribeToConnection(resolve));
-    await sendSlackMessage(response_url, "Connection detected", "in_channel");
 
-    // 플레이어 목록 가져오기
-    // const playerCount = Object.keys(players).length;
-    const playerNames = game.getPlayersInMap("rw-3")
+    // 모든 완료된 맵 ID 가져오기
+    const completedMapIds = game.getKnownCompletedMaps();
+    const firstMapId = completedMapIds.length > 0 ? completedMapIds[0] : "맵이 없습니다";
 
+    // 현재 접속자 수 가져오기
+    const userCount = Object.keys(game.players).length;
 
-    const responseText = `현재 게더 타운 접속자 : ${playerNames}\n`;
-
+    // 맵 ID와 현재 접속자 수를 Slack 메시지로 전송
+    const responseText = `연결 성공! 현재 맵 ID: ${firstMapId}, 접속자 수: ${userCount}명`;
     await sendSlackMessage(response_url, responseText, "in_channel");
 
     game.disconnect();
