@@ -13,19 +13,30 @@ const gatherTownCheck = async (req, res) => {
   game.connect();
 
   try {
+    // 연결 시도 메시지 전송
+    await sendSlackMessage(response_url, "Trying to connect to Gather Town...", "in_channel");
+
     // 연결 이벤트 대기
     await new Promise((resolve) => game.subscribeToConnection(resolve));
+    
+    // 연결 성공 메시지 전송
+    await sendSlackMessage(response_url, "Connected to Gather Town", "in_channel");
 
     // 기존 플레이어 정보 가져오기
     const userCount = Object.keys(game.players).length;
     const responseText = `현재 게더 타운 접속자 수: ${userCount}명`;
 
-    // Slack 메시지 전송
+    // 접속자 수 메시지 전송
     await sendSlackMessage(response_url, responseText, "in_channel");
     game.disconnect();
     res.status(200).send();
   } catch (error) {
     console.error("Error checking Gather Town users:", error);
+    
+    const errorMessage = `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${error.message}\n상세 내용: ${JSON.stringify(error)}`;
+    // 에러 메시지 전송
+    await sendSlackMessage(response_url, errorMessage, "ephemeral");
+    
     res.status(500).json({
       response_type: "ephemeral",
       text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${error.message}`,
