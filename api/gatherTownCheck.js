@@ -15,10 +15,18 @@ const gatherTownCheck = async (req, res) => {
   try {
     await new Promise((resolve) => game.subscribeToConnection(resolve));
 
-    // 연결 후 일정 시간 대기
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // playerJoins 이벤트 구독
+    const playerJoinsPromise = new Promise((resolve) => {
+      game.subscribeToEvent("playerJoins", () => {
+        resolve(Object.keys(game.players).length);
+      });
+    });
 
-    const userCount = Object.keys(game.players).length;
+    // 일정 시간 대기 (예: 3초)
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    // playerJoins 이벤트를 기다리거나, 3초 대기 후 진행
+    const userCount = await playerJoinsPromise.catch(() => Object.keys(game.players).length);
     const responseText = `현재 게더 타운 접속자 수: ${userCount}명`;
 
     await sendSlackMessage(response_url, responseText, "in_channel");
