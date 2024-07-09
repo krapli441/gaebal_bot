@@ -16,27 +16,26 @@ const gatherTownCheck = async (req, res) => {
 
   try {
     await new Promise((resolve) => game.subscribeToConnection(resolve));
-    await sendSlackMessage(response_url, "Connection detected", "in_channel");
+    await sendSlackMessage(response_url, "connected", "in_channel");
 
-    // 맵 정보 비동기 호출
     await new Promise((resolve) => setTimeout(resolve, 3000)); // 일정 시간 대기
+    await sendSlackMessage(response_url, "timeout started", "in_channel");
 
-    const completedMapIds = await game.getKnownCompletedMaps();
+    const completedMapIds = game.getKnownCompletedMaps();
     if (completedMapIds.length === 0) {
       throw new Error("No maps found in the space.");
     }
     const firstMapId = completedMapIds[0];
 
     // 첫 번째 맵의 플레이어 정보 가져오기
-    const playersInMap = await game.getPlayersInMap(firstMapId);
+    const playersInMap = game.getPlayersInMap(firstMapId);
 
     const responseText = `연결 성공! 현재 맵 ID: ${firstMapId}, 접속자 수: ${
       Object.keys(playersInMap).length
     }명`;
-    await sendSlackMessage(response_url, responseText, "in_channel");
+    sendSlackMessage(response_url, responseText, "in_channel");
 
     game.disconnect();
-    res.status(200).send();
   } catch (error) {
     const errorMessage = `오류 발생: ${
       error.message
