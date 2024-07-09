@@ -6,27 +6,34 @@ const checkHistory = async (req, res) => {
   const { response_url } = req.body;
 
   try {
+    console.log("Starting checkHistory function");
+    console.log("Request body:", req.body);
+
     // KV Store의 모든 키를 조회
     const keysResponse = await kv.keys("*");
-    const keys = keysResponse.keys; // keysResponse에서 실제 키 목록 추출
+    console.log("KV Store keys response:", keysResponse);
 
-    let responseText = "KV Store에 저장된 키 목록:\n";
-    keys.forEach((key, index) => {
-      responseText += `${index + 1}. ${key}\n`;
-    });
-
-    if (keys.length === 0) {
-      responseText = "KV Store에 저장된 키가 없습니다.";
-    }
+    const responseText = `KV Store keys response: ${JSON.stringify(keysResponse)}`;
 
     // 슬랙 메시지 전송
+    console.log("Sending Slack message with responseText:", responseText);
     await sendSlackMessage(response_url, responseText, "in_channel");
+    console.log("Slack message sent successfully");
+
     res.status(200).send();
   } catch (error) {
     console.error("Error fetching keys from KV Store:", error);
+
+    const errorMessage = `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${
+      error.message
+    }\n상세 내용: ${JSON.stringify(error)}`;
+
+    // 슬랙 메시지 전송
+    await sendSlackMessage(response_url, errorMessage, "ephemeral");
+
     res.status(500).json({
       response_type: "ephemeral",
-      text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${error.message}`,
+      text: errorMessage,
       details: error.message,
     });
   }
