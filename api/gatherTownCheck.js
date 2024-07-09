@@ -14,26 +14,29 @@ const gatherTownCheck = async (req, res) => {
 
   try {
     await new Promise((resolve) => game.subscribeToConnection(resolve));
+    await sendSlackMessage(response_url, "Connection detected", "in_channel");
 
-    // 모든 완료된 맵 ID 가져오기
-    const completedMapIds = game.getKnownCompletedMaps();
-    const firstMapId = completedMapIds.length > 0 ? completedMapIds[0] : "맵이 없습니다";
+    // 맵 정보 비동기 호출
+    await new Promise((resolve) => setTimeout(resolve, 3000)); // 일정 시간 대기
 
-    // 현재 접속자 수 가져오기
-    const userCount = Object.keys(game.players).length;
+    const completedMapIds = await game.getKnownCompletedMaps();
+    if (completedMapIds.length === 0) {
+      throw new Error("No maps found in the space.");
+    }
+    const firstMapId = completedMapIds[0];
 
-    // 맵 ID와 현재 접속자 수를 Slack 메시지로 전송
-    const responseText = `연결 성공! 현재 맵 ID: ${firstMapId}, 접속자 수: ${userCount}명`;
+    // 첫 번째 맵의 플레이어 정보 가져오기
+    const playersInMap = await game.getPlayersInMap(firstMapId);
+
+    const responseText = `연결 성공! 현재 맵 ID: ${firstMapId}, 접속자 수: ${Object.keys(playersInMap).length}명`;
     await sendSlackMessage(response_url, responseText, "in_channel");
 
     game.disconnect();
     res.status(200).send();
   } catch (error) {
-    await sendSlackMessage(
-      response_url,
-      `오류 발생: ${error.message}`,
-      "in_channel"
-    );
+    const errorMessage = `오류 발생: ${error.message}\n상세 내용: ${JSON.stringify(error)}`;
+    await sendSlackMessage(response_url, errorMessage, "in_channel");
+
     res.status(500).json({
       response_type: "ephemeral",
       text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${error.message}`,
