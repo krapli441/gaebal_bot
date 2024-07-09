@@ -33,7 +33,7 @@ const gatherTownCheck = async (req, res) => {
     const responseText = `연결 성공! 현재 맵 ID: ${firstMapId}, 접속자 수: ${
       Object.keys(playersInMap).length
     }명`;
-    sendSlackMessage(response_url, responseText, "in_channel");
+    await sendSlackMessage(response_url, responseText, "in_channel");
 
     game.disconnect();
   } catch (error) {
