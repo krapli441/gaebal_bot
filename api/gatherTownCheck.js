@@ -1,5 +1,7 @@
 const { Game } = require("@gathertown/gather-game-client");
 const { sendSlackMessage } = require("../utils/slack");
+const { WebSocket } = require("ws");
+global.WebSocket = WebSocket;
 
 require("dotenv").config();
 
@@ -28,13 +30,17 @@ const gatherTownCheck = async (req, res) => {
     // 첫 번째 맵의 플레이어 정보 가져오기
     const playersInMap = await game.getPlayersInMap(firstMapId);
 
-    const responseText = `연결 성공! 현재 맵 ID: ${firstMapId}, 접속자 수: ${Object.keys(playersInMap).length}명`;
+    const responseText = `연결 성공! 현재 맵 ID: ${firstMapId}, 접속자 수: ${
+      Object.keys(playersInMap).length
+    }명`;
     await sendSlackMessage(response_url, responseText, "in_channel");
 
     game.disconnect();
     res.status(200).send();
   } catch (error) {
-    const errorMessage = `오류 발생: ${error.message}\n상세 내용: ${JSON.stringify(error)}`;
+    const errorMessage = `오류 발생: ${
+      error.message
+    }\n상세 내용: ${JSON.stringify(error)}`;
     await sendSlackMessage(response_url, errorMessage, "in_channel");
 
     res.status(500).json({
