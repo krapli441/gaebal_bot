@@ -18,6 +18,10 @@
     {
       "src": "/api/send-message",
       "dest": "/api/send-message.js"
+    },
+    {
+      "src": "/api/checkHistory",
+      "dest": "/api/checkHistory.js"
     }
   ]
 }
