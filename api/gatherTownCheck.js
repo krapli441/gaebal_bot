@@ -14,26 +14,30 @@ const gatherTownCheck = async (req, res) => {
 
   try {
     await new Promise((resolve) => game.subscribeToConnection(resolve));
+    await sendSlackMessage(response_url, "Connection detected", "in_channel");
 
     // playerJoins 이벤트 구독
     const playerJoinsPromise = new Promise((resolve) => {
-      game.subscribeToEvent("playerJoins", () => {
-        resolve(Object.keys(game.players).length);
+      game.subscribeToEvent("playerJoins", (player) => {
+        resolve(player);
       });
     });
+    await sendSlackMessage(response_url, "Player join event subscribed", "in_channel");
 
     // 일정 시간 대기 (예: 3초)
     await new Promise((resolve) => setTimeout(resolve, 3000));
+    await sendSlackMessage(response_url, "3초 대기 종료", "in_channel");
 
     // playerJoins 이벤트를 기다리거나, 3초 대기 후 진행
-    const userCount = await playerJoinsPromise.catch(() => Object.keys(game.players).length);
-    const responseText = `현재 게더 타운 접속자 수: ${userCount}명`;
-
+    const player = await playerJoinsPromise.catch(() => null);
+    const responseText = player ? `Player joined: ${JSON.stringify(player)}` : "No new players joined.";
     await sendSlackMessage(response_url, responseText, "in_channel");
+
     game.disconnect();
     res.status(200).send();
   } catch (error) {
     console.error("Error checking Gather Town users:", error);
+    await sendSlackMessage(response_url, `오류 발생: ${error.message}`, "in_channel");
     res.status(500).json({
       response_type: "ephemeral",
       text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${error.message}`,
