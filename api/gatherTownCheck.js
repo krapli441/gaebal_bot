@@ -17,7 +17,7 @@ const gatherTownCheck = async (req, res) => {
     await sendSlackMessage(response_url, "Connection detected", "in_channel");
 
     // playerJoins 이벤트 구독
-    const playerJoinsPromise = new Promise((resolve) => {
+    const playerJoinsPromise = new Promise((resolve, reject) => {
       game.subscribeToEvent("playerJoins", (player) => {
         resolve(player);
       });
@@ -29,14 +29,17 @@ const gatherTownCheck = async (req, res) => {
     await sendSlackMessage(response_url, "3초 대기 종료", "in_channel");
 
     // playerJoins 이벤트를 기다리거나, 3초 대기 후 진행
-    const player = await playerJoinsPromise.catch(() => null);
+    const player = await playerJoinsPromise.catch((error) => {
+      sendSlackMessage(response_url, `Error in playerJoinsPromise: ${error.message}`, "in_channel");
+      return null;
+    });
+
     const responseText = player ? `Player joined: ${JSON.stringify(player)}` : "No new players joined.";
     await sendSlackMessage(response_url, responseText, "in_channel");
 
     game.disconnect();
     res.status(200).send();
   } catch (error) {
-    console.error("Error checking Gather Town users:", error);
     await sendSlackMessage(response_url, `오류 발생: ${error.message}`, "in_channel");
     res.status(500).json({
       response_type: "ephemeral",
