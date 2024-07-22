@@ -19,15 +19,23 @@ const checkOut = async (req, res) => {
       const checkInTime = userData.checkIn;
       const checkOutTime = timeString;
 
-      const { hours, minutes, seconds } = calculateDuration(
+      console.log(
+        `Check-in time: ${checkInTime}, Check-out time: ${checkOutTime}`
+      );
+
+      const { hours, minutes, seconds, durationInSeconds } = calculateDuration(
         checkInTime,
         checkOutTime
+      );
+
+      console.log(
+        `Calculated duration - hours: ${hours}, minutes: ${minutes}, seconds: ${seconds}, total seconds: ${durationInSeconds}`
       );
 
       await kv.hmset(userKey, {
         ...userData,
         checkOut: checkOutTime,
-        workDuration: `${hours}시간 ${minutes}분 ${seconds}초`,
+        workDuration: durationInSeconds, // 초 단위로 저장
       });
 
       responseText = `<@${user_id}> 근퇴~ 오늘 ${hours}시간 ${minutes}분 작업했데이~`;
@@ -36,10 +44,13 @@ const checkOut = async (req, res) => {
     await sendSlackMessage(response_url, responseText, "in_channel");
     res.status(200).send();
   } catch (error) {
-    console.error("Error processing check-out:", error);
+    const errorMessage = `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${
+      error.message
+    }\n상세 내용: ${JSON.stringify(error)}`;
+    await sendSlackMessage(response_url, errorMessage, "ephemeral");
     res.status(500).json({
       response_type: "ephemeral",
-      text: `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${error.message}`,
+      text: errorMessage,
       details: error.message,
     });
   }

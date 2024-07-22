@@ -23,7 +23,7 @@ const calculateDuration = (startTime, endTime) => {
   const minutes = Math.floor((durationInSeconds % 3600) / 60);
   const seconds = durationInSeconds % 60;
 
-  return { hours, minutes, seconds };
+  return { hours, minutes, seconds, durationInSeconds };
 };
 
 module.exports = { formatTimeString, calculateDuration };
