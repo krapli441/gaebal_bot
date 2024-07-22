@@ -10,7 +10,7 @@ const checkHistory = async (req, res) => {
     const keysResponse = await kv.keys("*");
     console.log("KV Store keys response:", keysResponse);
 
-    const keys = keysResponse.filter(key => key.includes(user_id));
+    const keys = keysResponse.filter((key) => key.includes(user_id));
 
     let userHistory = [];
     let totalHours = 0;
@@ -18,17 +18,19 @@ const checkHistory = async (req, res) => {
 
     for (const key of keys) {
       const type = await kv.type(key);
-      if (type === 'hash') {
+      if (type === "hash") {
         const userData = await kv.hgetall(key);
         userHistory.push(userData);
 
         // 작업 시간을 합산
-        if (userData.workDuration) {
-          const [hours, minutes, seconds] = userData.workDuration.split(":").map(Number);
+        if (userData.workDuration && userData.checkOut !== "null") {
+          const [hours, minutes, seconds] = userData.workDuration
+            .split(":")
+            .map(Number);
           totalHours += hours;
           totalMinutes += minutes;
         } else {
-          console.warn(`workDuration is missing for key ${key}`);
+          console.warn(`workDuration or checkOut is missing for key ${key}`);
         }
       } else {
         console.warn(`Key ${key} is not a hash, it is of type ${type}`);
@@ -38,7 +40,7 @@ const checkHistory = async (req, res) => {
     // 분을 시간으로 변환
     totalHours += Math.floor(totalMinutes / 60);
     totalMinutes = totalMinutes % 60;
-    
+
     // 시간을 일수와 시간으로 변환
     const totalDays = Math.floor(totalHours / 24);
     const remainingHours = totalHours % 24;
@@ -46,7 +48,15 @@ const checkHistory = async (req, res) => {
     // 사용자 이력을 텍스트로 변환
     let responseText = `사용자 <@${user_id}>의 출퇴근 이력:\n`;
     userHistory.forEach((data, index) => {
-      responseText += `${index + 1}. 날짜: ${data.date}, 출근 시간: ${data.checkIn}, 퇴근 시간: ${data.checkOut}, 작업 시간: ${data.workDuration ? data.workDuration : "N/A"}\n`;
+      const workDuration =
+        data.workDuration && data.checkOut !== "null"
+          ? data.workDuration
+          : "N/A";
+      responseText += `${index + 1}. 날짜: ${data.date}, 출근 시간: ${
+        data.checkIn
+      }, 퇴근 시간: ${
+        data.checkOut !== "null" ? data.checkOut : "N/A"
+      }, 작업 시간: ${workDuration}\n`;
     });
 
     if (userHistory.length === 0) {
@@ -64,7 +74,9 @@ const checkHistory = async (req, res) => {
   } catch (error) {
     console.error("Error fetching keys from KV Store:", error);
 
-    const errorMessage = `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${error.message}\n상세 내용: ${JSON.stringify(error)}`;
+    const errorMessage = `명령어 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요. 에러: ${
+      error.message
+    }\n상세 내용: ${JSON.stringify(error)}`;
 
     // 슬랙 메시지 전송
     await sendSlackMessage(response_url, errorMessage, "ephemeral");
