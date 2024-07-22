@@ -6,6 +6,7 @@ const checkHistory = async (req, res) => {
   const { user_id, response_url } = req.body;
 
   try {
+
     // KV Store의 모든 키를 조회
     const keysResponse = await kv.keys("*");
     console.log("KV Store keys response:", keysResponse);
@@ -23,14 +24,20 @@ const checkHistory = async (req, res) => {
         userHistory.push(userData);
 
         // 작업 시간을 합산
-        if (userData.workDuration && userData.checkOut !== "null") {
+        if (
+          userData.workDuration &&
+          userData.checkOut !== "null" &&
+          userData.checkOut
+        ) {
           const [hours, minutes, seconds] = userData.workDuration
             .split(":")
             .map(Number);
           totalHours += hours;
           totalMinutes += minutes;
         } else {
-          console.warn(`workDuration or checkOut is missing for key ${key}`);
+          console.warn(
+            `workDuration or checkOut is missing or null for key ${key}`
+          );
         }
       } else {
         console.warn(`Key ${key} is not a hash, it is of type ${type}`);
@@ -49,13 +56,13 @@ const checkHistory = async (req, res) => {
     let responseText = `사용자 <@${user_id}>의 출퇴근 이력:\n`;
     userHistory.forEach((data, index) => {
       const workDuration =
-        data.workDuration && data.checkOut !== "null"
+        data.workDuration && data.checkOut !== "null" && data.checkOut
           ? data.workDuration
           : "N/A";
       responseText += `${index + 1}. 날짜: ${data.date}, 출근 시간: ${
         data.checkIn
       }, 퇴근 시간: ${
-        data.checkOut !== "null" ? data.checkOut : "N/A"
+        data.checkOut !== "null" && data.checkOut ? data.checkOut : "N/A"
       }, 작업 시간: ${workDuration}\n`;
     });
 
