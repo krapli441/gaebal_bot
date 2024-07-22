@@ -82,7 +82,7 @@ const checkHistory = async (req, res) => {
     if (userHistory.length === 0) {
       responseText = `사용자 <@${user_id}>의 저장된 이력이 없습니다.`;
     } else {
-      responseText += `\n<@${user_id}> 총 ${totalDays}일 ${remainingHours}시간 ${totalMinutes}분 ${totalRemainingSeconds}초동안 근출했데이~`;
+      responseText += `\n<@${user_id}> 총 ${totalDays}일 ${remainingHours}시간 ${totalMinutes}분동안 작업했데이~`;
     }
 
     // 슬랙 메시지 전송
