@@ -6,6 +6,8 @@ const checkHistory = async (req, res) => {
   const { user_id, response_url } = req.body;
 
   try {
+    console.log("Starting checkHistory function");
+    console.log("Request body:", req.body);
 
     // KV Store의 모든 키를 조회
     const keysResponse = await kv.keys("*");
@@ -32,8 +34,16 @@ const checkHistory = async (req, res) => {
           const [hours, minutes, seconds] = userData.workDuration
             .split(":")
             .map(Number);
-          totalHours += hours;
-          totalMinutes += minutes;
+
+          // hours, minutes, seconds가 유효한 숫자인지 확인
+          if (!isNaN(hours) && !isNaN(minutes) && !isNaN(seconds)) {
+            totalHours += hours;
+            totalMinutes += minutes;
+          } else {
+            console.warn(
+              `Invalid workDuration format for key ${key}: ${userData.workDuration}`
+            );
+          }
         } else {
           console.warn(
             `workDuration or checkOut is missing or null for key ${key}`
