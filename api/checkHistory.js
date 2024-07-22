@@ -16,8 +16,7 @@ const checkHistory = async (req, res) => {
     const keys = keysResponse.filter((key) => key.includes(user_id));
 
     let userHistory = [];
-    let totalHours = 0;
-    let totalMinutes = 0;
+    let totalSeconds = 0;
 
     for (const key of keys) {
       const type = await kv.type(key);
@@ -26,38 +25,52 @@ const checkHistory = async (req, res) => {
         userHistory.push(userData);
 
         // 작업 시간을 합산
-        if (userData.workDuration && userData.checkOut !== "null" && userData.checkOut) {
-          const [hours, minutes, seconds] = userData.workDuration.split(":").map(Number);
+        if (
+          userData.workDuration &&
+          userData.checkOut !== "null" &&
+          userData.checkOut
+        ) {
+          const durationInSeconds = Number(userData.workDuration);
 
-          // hours, minutes, seconds가 유효한 숫자인지 확인
-          if (!isNaN(hours) && !isNaN(minutes) && !isNaN(seconds)) {
-            totalHours += hours;
-            totalMinutes += minutes;
+          // durationInSeconds가 유효한 숫자인지 확인
+          if (!isNaN(durationInSeconds)) {
+            totalSeconds += durationInSeconds;
           } else {
-            console.warn(`Invalid workDuration format for key ${key}: ${userData.workDuration}`);
+            console.warn(
+              `Invalid workDuration format for key ${key}: ${userData.workDuration}`
+            );
           }
         } else {
-          console.warn(`workDuration or checkOut is missing or null for key ${key}`);
+          console.warn(
+            `workDuration or checkOut is missing or null for key ${key}`
+          );
         }
       } else {
         console.warn(`Key ${key} is not a hash, it is of type ${type}`);
       }
     }
 
-    // 분을 시간으로 변환
-    totalHours += Math.floor(totalMinutes / 60);
-    totalMinutes = totalMinutes % 60;
+    // 초를 시간과 분으로 변환
+    const totalHours = Math.floor(totalSeconds / 3600);
+    const totalMinutes = Math.floor((totalSeconds % 3600) / 60);
+    const totalRemainingSeconds = totalSeconds % 60;
 
     // 시간을 일수와 시간으로 변환
     const totalDays = Math.floor(totalHours / 24);
     const remainingHours = totalHours % 24;
+
+    console.log(`Total seconds: ${totalSeconds}`);
+    console.log(`Total hours: ${totalHours}, Total minutes: ${totalMinutes}`);
+    console.log(`Total days: ${totalDays}, Remaining hours: ${remainingHours}`);
 
     // 사용자 이력을 텍스트로 변환
     let responseText = `사용자 <@${user_id}>의 출퇴근 이력:\n`;
     userHistory.forEach((data, index) => {
       const workDuration =
         data.workDuration && data.checkOut !== "null" && data.checkOut
-          ? data.workDuration
+          ? `${Math.floor(data.workDuration / 3600)}시간 ${Math.floor(
+              (data.workDuration % 3600) / 60
+            )}분 ${data.workDuration % 60}초`
           : "N/A";
       responseText += `${index + 1}. 날짜: ${data.date}, 출근 시간: ${
         data.checkIn
@@ -66,12 +79,10 @@ const checkHistory = async (req, res) => {
       }, 작업 시간: ${workDuration}\n`;
     });
 
-    responseText += `\n<@${user_id}> 총 ${totalDays}일 ${remainingHours}시간 ${totalMinutes}분동안 근출했데이~`;
-    responseText += `\n(디버그 정보) Total hours: ${totalHours}, Total minutes: ${totalMinutes}`;
-    responseText += `\n(디버그 정보) Total days: ${totalDays}, Remaining hours: ${remainingHours}`;
-
     if (userHistory.length === 0) {
       responseText = `사용자 <@${user_id}>의 저장된 이력이 없습니다.`;
+    } else {
+      responseText += `\n<@${user_id}> 총 ${totalDays}일 ${remainingHours}시간 ${totalMinutes}분 ${totalRemainingSeconds}초동안 근출했데이~`;
     }
 
     // 슬랙 메시지 전송
