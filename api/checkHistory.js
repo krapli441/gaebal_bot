@@ -6,12 +6,8 @@ const checkHistory = async (req, res) => {
   const { user_id, response_url } = req.body;
 
   try {
-    console.log("Starting checkHistory function");
-    console.log("Request body:", req.body);
-
     // KV Store의 모든 키를 조회
     const keysResponse = await kv.keys("*");
-    console.log("KV Store keys response:", keysResponse);
 
     const keys = keysResponse.filter((key) => key.includes(user_id));
 
@@ -59,25 +55,21 @@ const checkHistory = async (req, res) => {
     const totalDays = Math.floor(totalHours / 24);
     const remainingHours = totalHours % 24;
 
-    console.log(`Total seconds: ${totalSeconds}`);
-    console.log(`Total hours: ${totalHours}, Total minutes: ${totalMinutes}`);
-    console.log(`Total days: ${totalDays}, Remaining hours: ${remainingHours}`);
-
     // 사용자 이력을 텍스트로 변환
     let responseText = `사용자 <@${user_id}>의 출퇴근 이력:\n`;
-    userHistory.forEach((data, index) => {
-      const workDuration =
-        data.workDuration && data.checkOut !== "null" && data.checkOut
-          ? `${Math.floor(data.workDuration / 3600)}시간 ${Math.floor(
-              (data.workDuration % 3600) / 60
-            )}분 ${data.workDuration % 60}초`
-          : "N/A";
-      responseText += `${index + 1}. 날짜: ${data.date}, 출근 시간: ${
-        data.checkIn
-      }, 퇴근 시간: ${
-        data.checkOut !== "null" && data.checkOut ? data.checkOut : "N/A"
-      }, 작업 시간: ${workDuration}\n`;
-    });
+    // userHistory.forEach((data, index) => {
+    //   const workDuration =
+    //     data.workDuration && data.checkOut !== "null" && data.checkOut
+    //       ? `${Math.floor(data.workDuration / 3600)}시간 ${Math.floor(
+    //           (data.workDuration % 3600) / 60
+    //         )}분 ${data.workDuration % 60}초`
+    //       : "N/A";
+    //   responseText += `${index + 1}. 날짜: ${data.date}, 출근 시간: ${
+    //     data.checkIn
+    //   }, 퇴근 시간: ${
+    //     data.checkOut !== "null" && data.checkOut ? data.checkOut : "N/A"
+    //   }, 작업 시간: ${workDuration}\n`;
+    // });
 
     if (userHistory.length === 0) {
       responseText = `사용자 <@${user_id}>의 저장된 이력이 없습니다.`;
